@@ -1,13 +1,16 @@
 package com.shin.kart.data;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.util.Log;
 
-import androidx.core.content.ContextCompat;
-import androidx.core.content.res.ResourcesCompat;
-
 import com.shin.kart.R;
+
+
+import org.json.JSONException;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,23 +25,24 @@ import java.util.Map;
 public class KartApi {
 
     public Context context;
-    public String userName;
+    public String stringData;
     public String responseBody;
 
-    public KartApi (String userName, Context context) {
-        this.userName = userName;
+    public KartApi (String stringData, Context context) {
+        this.stringData = stringData;
         this.context = context;
     }
 
     public void main() {
 
         String apiKey = context.getResources().getString(R.string.api_key);
-        String apiURL = "https://api.nexon.co.kr/kart/v1.0/users/nickname/" + userName;
+        String apiURL = "https://api.nexon.co.kr/kart/v1.0/users/nickname/" + stringData;
 
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Authorization", apiKey);
         responseBody = get(apiURL,requestHeaders);
         Log.d("Rp", responseBody);
+        parseJsonData(responseBody);
     }
 
     private String get(String apiUrl, Map<String, String> requestHeaders){
@@ -88,6 +92,27 @@ public class KartApi {
             return responseBody.toString();
         } catch (IOException e) {
             throw new RuntimeException("API 응답을 읽는데 실패했습니다.", e);
+        }
+    }
+
+    private static void parseJsonData(String responseBody) {
+        String accessId;
+        String userName;
+        Long level;
+        try {
+            Object object = null;
+            JSONParser jsonParser = new JSONParser();
+            object = jsonParser.parse(responseBody);
+
+            accessId = (String) ((JSONObject)object).get("accessId");
+            userName = (String) ((JSONObject)object).get("name");
+            level = Long.parseLong(((JSONObject)object).get("level").toString());
+
+            System.out.println("id : " + accessId);
+            System.out.println("name : " + userName);
+            System.out.println("level : " + level);
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
     }
 }

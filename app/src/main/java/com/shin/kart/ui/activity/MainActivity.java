@@ -12,7 +12,7 @@ import android.widget.EditText;
 import com.shin.kart.R;
 import com.shin.kart.data.KartApi;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     public Button getButton;
     public EditText editText;
@@ -30,18 +30,21 @@ public class MainActivity extends AppCompatActivity {
         getButton = (Button)findViewById(R.id.button);
         editText = (EditText)findViewById(R.id.edittext);
 
-        getButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Thread thread = new Thread() {
-                    public void run() {
-                        KartApi api = new KartApi(editText.getText().toString(), context);
-                        api.main();
-                        userData = api.responseBody;
-                    }
-                };
-                thread.start();
-            }
-        });
+        getButton.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if(v == getButton) {
+            Thread thread = new Thread() {
+                public void run() {
+                    KartApi api = new KartApi(editText.getText().toString(), context);
+                    api.main();
+                    userData = api.responseBody;
+                    Log.d("응애", userData);
+                }
+            };
+            thread.start();
+        }
     }
 }
